@@ -1,0 +1,4 @@
+[[mgr.prepend_keymap]]
+on = "<C-t>"
+run = 'shell "minitask" --block'
+desc = "minitaskを開く"

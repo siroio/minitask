@@ -1,0 +1,80 @@
+name: Windows build and release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      PYTHONUTF8: '1'
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Install Rust and license documents
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          rustup toolchain install stable --profile minimal --component rust-docs
+          rustup override set stable
+          rustup target add x86_64-pc-windows-msvc
+
+      - name: Check version and tag
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $metadata = cargo metadata --locked --no-deps --format-version 1 | ConvertFrom-Json
+          $version = $metadata.packages[0].version
+          if ($env:GITHUB_REF_TYPE -eq 'tag' -and $env:GITHUB_REF_NAME -cne "v$version") {
+            throw "Tag $env:GITHUB_REF_NAME does not match Cargo.toml version v$version"
+          }
+          "PACKAGE=publish/minitask-$version-windows-x64.zip" >> $env:GITHUB_ENV
+
+      - name: Test Rust
+        run: cargo test --locked
+
+      - name: Build distribution
+        run: ./scripts/package.ps1
+
+      - name: Verify CLI skill and relocated package
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          python tests/skill_cli.py target/package/x86_64-pc-windows-msvc/release/minitask.exe
+          python tests/package.py $env:PACKAGE
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: minitask-windows-x64
+          path: |
+            ${{ env.PACKAGE }}
+            ${{ env.PACKAGE }}.sha256
+          if-no-files-found: error
+
+      - name: Publish tagged release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $PSNativeCommandUseErrorActionPreference = $true
+          $options = @('--verify-tag', '--generate-notes', '--title', $env:GITHUB_REF_NAME)
+          if ($env:GITHUB_REF_NAME.Contains('-')) { $options += '--prerelease' }
+          gh release create $env:GITHUB_REF_NAME $env:PACKAGE "$env:PACKAGE.sha256" @options

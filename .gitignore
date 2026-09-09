@@ -1,0 +1,7 @@
+/minitask.exe
+/minitask
+/.cache/
+/target/
+/emacs/*.elc
+/publish/
+/nvim.log
