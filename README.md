@@ -2,9 +2,9 @@
 
 Yaziから起動する、作業の続きを思い出すためのタスク管理TUI。workspaceごとのディレクトリに1タスク1Markdownで詳細メモを保存し、Neovim / Emacsで直接編集します。
 
-![描画プレビュー（サンプルデータ）](docs/minitask-ui.png)
+![実画面（サンプルデータ）](docs/minitask-ui.png)
 
-v0.3.1では[lazygitのテーマ・フォーカス表示](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#default)、[btopのパネルとメーター](https://github.com/aristocratos/btop#screenshots)、[Atuinの検索UI](https://github.com/atuinsh/atuin)を参考に、角丸パネル、共通ダーク配色、件数バッジ、完了バー、キー表示を整理しました。絵文字や専用アイコンフォントは不要です。画像はRatatuiの描画データから作成したプレビューで、フォントは端末設定に従います。
+v0.3.1では[lazygitのテーマ・フォーカス表示](https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#default)、[btopのパネルとメーター](https://github.com/aristocratos/btop#screenshots)、[Atuinの検索UI](https://github.com/atuinsh/atuin)を参考に、角丸パネル、共通ダーク配色、件数バッジ、完了バー、キー表示を整理しました。絵文字や専用アイコンフォントは不要です。画像はWindowsのWezTermで実行したminitaskのスクリーンショットです。
 
 ## 起動
 
